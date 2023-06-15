@@ -76,6 +76,28 @@ public class Exercise{
     }
 
     /**
+     *
+     */
+    static double averageGPA(List<Student> ps){
+        Supplier<IllegalArgumentException> NoStudentError = new Supplier<IllegalArgumentException>(){
+            @Override
+            public IllegalArgumentException get(){
+                return new IllegalArgumentException();
+            }
+        };
+
+        return ps.stream()
+                .mapMultiToDouble((num,cons)->{
+                    if(num.gpa!=0){
+                        cons.accept(num.gpa);
+                    }
+                })
+                .average()
+                .orElseThrow(NoStudentError);
+    }
+
+
+    /**
      * 'firstAlphabetical' that finds the person whose name comes first in alphabetical order in the list.
      * If the list is empty, throw an IllegalArgumentException.
      * compare the person names using String's compareTo method in your comparator.
@@ -97,12 +119,34 @@ public class Exercise{
                 .findFirst().orElseThrow(illegalArgumentExceptionSupplier);
     }
 
-    /**
-     * 'findMostPopulated' method to find the city with the least population.
-     * If the map is empty, throw a NoSuchElementException.
-     * @param that
-     * @return
-     */
+
+    record Node(double weight, String city, Set<Node> links){}
+
+    static Map<Double,String> flatten(List<Node> nodes, Consumer<>) {
+        return nodes.stream()
+                .<Map.Entry<Double,String>>mapMulti((node,cons)->{
+                    cons.accept(Map.entry(node.weight,node.city));
+                    node.links.stream()
+                            .map(x -> Map.entry(node.weight,node.city))
+                            .forEach(cons);
+
+                })
+                .collect(Collectors.toMap(Map.Entry::getKey,Map.Entry::getValue)); // .toMap take key,val (two suppliers)
+
+        /*
+        eg
+            .collect(Collectors.toMap(x -> x.valforkey,y-> y.valforval));
+         */
+    }
+
+
+
+        /**
+         * 'findMostPopulated' method to find the city with the least population.
+         * If the map is empty, throw a NoSuchElementException.
+         * @param that
+         * @return
+         */
     static String findLeastPopulated(HashMap<String,Integer> that){
         return that.entrySet()
                 .stream()

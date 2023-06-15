@@ -12,7 +12,7 @@ import java.util.stream.Stream;
  * 5. Return a string representation of the OOSet.
  * Use match to implement the above operations.
  *
- * Author: Hamish Burke
+ * @Author Hamish Burke
  * Last Modified: 15/06/2023
  *
  * @param <T>
@@ -76,7 +76,7 @@ interface OOSet<T>{
     default boolean contains(T data){
         return match(
                 ()-> false,
-                (prev,curr)-> curr.equals(data) ? true : prev.contains(data)
+                (prev,curr)-> curr.equals(data) || prev.contains(data)
         );
     }
 
@@ -156,13 +156,34 @@ interface OOSet<T>{
 
 }
 
-class Example{
-    private record Person(String name, int age){
-        @Override
-        public String toString(){
-            return name;
-        }
+class Person2{
+    String name;
+    int age;
+
+    public String getName(){return name;}
+    public int getAge(){return age;}
+
+    Person2(String name, int age){
+        this.name = name;
+        this.age = age;
     }
+
+    public String toString(){
+        return name;
+    }
+
+    public boolean equals(Object obj){
+        if(obj==this){return true;}
+        if(obj==null){return false;}
+        if(obj instanceof Person2 p){
+            return p.name.equals(this.name)&&p.age==this.age;
+        }
+        return false;
+    }
+
+}
+
+class Example{
 
     public static void main(String[] args){
         // Use match to implement the above operations.
@@ -179,8 +200,8 @@ class Example{
         System.out.println(set.size()); // 3
 
         // Create a OOSet of Person objects
-        OOSet<Person> people = OOSet.empty();
-        people = people.add(new Person("Hamish", 19)).add(new Person("John", 22)).add(new Person("Jane", 23));
+        OOSet<Person2> people = OOSet.empty();
+        people = people.add(new Person2("Hamish", 19)).add(new Person2("John", 22)).add(new Person2("Jane", 23));
         System.out.println(people.output());
 
         // Find the youngest person
@@ -205,12 +226,12 @@ class Example{
      * Find the youngest person in the OOSet.
      * @param people
      */
-    public static Person findYoungest(OOSet<Person> people){
+    public static Person findYoungest(OOSet<Person2> people){
         return people.match(
                 ()-> null,
                 (prev,curr)-> {
                     Person youngest = findYoungest(prev);
-                    return youngest == null || curr.age() < youngest.age() ? curr : youngest;
+                    return youngest == null || curr.getAge() < youngest.height()
                 }
         );
     }
@@ -219,9 +240,9 @@ class Example{
      * Find the youngest person in the OOSet.
      * Using streams.
      */
-    public static Person findYoungest2(OOSet<Person> people) {
+    public static Person2 findYoungest2(OOSet<Person2> people) {
         return people.stream()
-                .reduce((a, b) -> a.age() < b.age() ? a : b)
+                .reduce((a, b) -> a.getAge() < b.getAge() ? a : b)
                 .orElse(null);
     }
 
